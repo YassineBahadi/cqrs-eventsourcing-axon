@@ -52,6 +52,15 @@ public class AccountAggregate {
     }
 
 
+    @EventSourcingHandler
+    public void on(AccountActivatedEvent event){
+        log.info("@@@@@@@@@@ AccountActivatedEvent Occured @@@@@@@@@@@@@");
+        this.accountId=event.getAccountId();
+        this.status=event.getStatus();
+    }
+
+
+
 
     @CommandHandler
     public void handle(CreditAccountCommand command){
