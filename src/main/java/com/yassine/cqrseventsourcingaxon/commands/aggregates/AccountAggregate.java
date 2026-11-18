@@ -3,11 +3,9 @@ package com.yassine.cqrseventsourcingaxon.commands.aggregates;
 import com.yassine.cqrseventsourcingaxon.commands.commands.AddAccountCommand;
 import com.yassine.cqrseventsourcingaxon.commands.commands.CreditAccountCommand;
 import com.yassine.cqrseventsourcingaxon.commands.commands.DebitAccountCommand;
+import com.yassine.cqrseventsourcingaxon.commands.commands.UpdateAccountStatusCommand;
 import com.yassine.cqrseventsourcingaxon.enums.AccountStatus;
-import com.yassine.cqrseventsourcingaxon.events.AccountActivatedEvent;
-import com.yassine.cqrseventsourcingaxon.events.AccountCreatedEvent;
-import com.yassine.cqrseventsourcingaxon.events.AccountCreditedEvent;
-import com.yassine.cqrseventsourcingaxon.events.AccountDebitedEvent;
+import com.yassine.cqrseventsourcingaxon.events.*;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -107,6 +105,29 @@ public class AccountAggregate {
         log.info("@@@@@@@@@@ AccountDebitedEvent Occured @@@@@@@@@@@@@");
         this.accountId=event.getAccountId();
         this.balance= this.balance -   event.getAmount();
+    }
+
+
+
+
+    @CommandHandler
+    public void handle(UpdateAccountStatusCommand command){
+        log.info("@@@@@@@@@@ UpdateAccountStatusCommand Received @@@@@@@@@@@@@");
+        if(command.getStatus()==status){
+            throw new RuntimeException("This account is already " + command.getStatus());
+        }
+        AggregateLifecycle.apply(new AccountStatusUpdatedEvent(
+                command.getId(),
+                command.getStatus()
+        ));
+    }
+
+
+    @EventSourcingHandler
+    public void on(AccountStatusUpdatedEvent event){
+        log.info("@@@@@@@@@@ AccountStatusUpdatedEvent Occured @@@@@@@@@@@@@");
+        this.accountId=event.getAccountId();
+        this.status=event.getStatus();
     }
 
 
