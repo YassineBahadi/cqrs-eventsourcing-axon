@@ -5,6 +5,7 @@ import com.yassine.cqrseventsourcingaxon.query.entities.Account;
 import com.yassine.cqrseventsourcingaxon.query.entities.AccountOperation;
 import com.yassine.cqrseventsourcingaxon.query.queries.GetAccountStatementQuery;
 import com.yassine.cqrseventsourcingaxon.query.queries.GetAllAccountsQuery;
+import com.yassine.cqrseventsourcingaxon.query.queries.WatchEventQuery;
 import com.yassine.cqrseventsourcingaxon.query.repository.AccountRepository;
 import com.yassine.cqrseventsourcingaxon.query.repository.OperationRepository;
 import org.axonframework.queryhandling.QueryHandler;
@@ -36,6 +37,11 @@ public class AccountQueryHandler {
         Account account=accountRepository.findById(query.getAccountId()).get();
         List<AccountOperation> operations=operationRepository.findByAccountId(query.getAccountId());
         return new AccountStatementResponseDTO(account,operations);
+    }
+
+    @QueryHandler
+    public AccountOperation on(WatchEventQuery query){
+        return AccountOperation.builder().build();
     }
 
 
