@@ -4,6 +4,7 @@ import com.yassine.cqrseventsourcingaxon.enums.OperationType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.util.Date;
 
 /**
@@ -16,7 +17,7 @@ public class AccountOperation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Date date;
+    private Instant date;
     private double amount;
     @Enumerated(EnumType.STRING)
     private OperationType type;
