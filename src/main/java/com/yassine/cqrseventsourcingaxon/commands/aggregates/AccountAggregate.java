@@ -2,10 +2,12 @@ package com.yassine.cqrseventsourcingaxon.commands.aggregates;
 
 import com.yassine.cqrseventsourcingaxon.commands.commands.AddAccountCommand;
 import com.yassine.cqrseventsourcingaxon.commands.commands.CreditAccountCommand;
+import com.yassine.cqrseventsourcingaxon.commands.commands.DebitAccountCommand;
 import com.yassine.cqrseventsourcingaxon.enums.AccountStatus;
 import com.yassine.cqrseventsourcingaxon.events.AccountActivatedEvent;
 import com.yassine.cqrseventsourcingaxon.events.AccountCreatedEvent;
 import com.yassine.cqrseventsourcingaxon.events.AccountCreditedEvent;
+import com.yassine.cqrseventsourcingaxon.events.AccountDebitedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -83,6 +85,30 @@ public class AccountAggregate {
         this.accountId=event.getAccountId();
         this.balance= this.balance+  event.getAmount();
     }
+
+    @CommandHandler
+    public void handle(DebitAccountCommand command){
+        log.info("@@@@@@@@@@ DebitAccountCommand Received @@@@@@@@@@@@@");
+        if(!status.equals(AccountStatus.ACTIVATED)){
+            throw new RuntimeException("The account "+command.getId()+" is not activated");
+        }
+        if(balance<command.getAmount()) throw new RuntimeException("Balance not sufficient");
+        if(command.getAmount()<=0) throw new IllegalArgumentException("Amount must be positive");
+        AggregateLifecycle.apply(new AccountDebitedEvent(
+                command.getId(),
+                command.getAmount(),
+                command.getCurrency()
+        ));
+    }
+
+
+    @EventSourcingHandler
+    public void on(AccountDebitedEvent event){
+        log.info("@@@@@@@@@@ AccountDebitedEvent Occured @@@@@@@@@@@@@");
+        this.accountId=event.getAccountId();
+        this.balance= this.balance -   event.getAmount();
+    }
+
 
 
 }
